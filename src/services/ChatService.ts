@@ -10,10 +10,9 @@ export class ChatService {
         const existingChat = await this.chatRepo.findChatBetween(userA.uid, userB.uid);
         if (existingChat) return existingChat;
 
-        const chat = await this.chatRepo.create({
+        return await this.chatRepo.create({
             participants: [userA.uid, userB.uid],
             messages: []
         });
-        return chat;
     }
 }
