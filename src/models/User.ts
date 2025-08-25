@@ -9,6 +9,7 @@ export interface IUser extends Document {
     friends: string[];
     isOnline: boolean;
     lastSeen: Date;
+    refreshToken?: string;
 }
 
 const UserSchema = new Schema<IUser>({
@@ -18,7 +19,8 @@ const UserSchema = new Schema<IUser>({
     avatar: { type: String, default: null },
     friends: { type: [String], default: [] },
     isOnline: { type: Boolean, default: false },
-    lastSeen: { type: Date, default: null }
+    lastSeen: { type: Date, default: null },
+    refreshToken: { type: String, default: null }
 });
 
 export const UserModel = model<IUser>("User", UserSchema);

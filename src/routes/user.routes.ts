@@ -8,6 +8,6 @@ export const userRoutes = async (app: FastifyInstance) => {
 
     app.get("/users/:uid/status", userController.getStatus);
     app.get("/users/:uid", userController.getProfile);
-    app.get("/users/me", { preValidation: [app.authenticate] }, userController.getMe);
+    app.get("/users/me", { preValidation: [app.authenticate]}, userController.getMe);
 
 };

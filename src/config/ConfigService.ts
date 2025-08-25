@@ -33,4 +33,31 @@ export class ConfigService {
 
         return `mongodb+srv://${user}:${pass}@${cluster}/${db}?retryWrites=true&w=majority&appName=Shtraf-bat`;
     }
+
+    getAccessTokenExpires(): string {
+        return this.getValue("ACCESS_TOKEN_EXPIRES", true);
+    }
+
+    getRefreshTokenExpires(): string {
+        return this.getValue("REFRESH_TOKEN_EXPIRES", true);
+    }
+
+    getRefreshTokenExpiresInSeconds(): number {
+        const expires = this.getValue("REFRESH_TOKEN_EXPIRES");
+        const match = expires.match(/^(\d+)([smhd])$/);
+        if (!match) return 7 * 24 * 60 * 60;
+
+        const value = parseInt(match[1], 10);
+        const unit = match[2];
+        switch (unit) {
+            case "s": return value;
+            case "m": return value * 60;
+            case "h": return value * 60 * 60;
+            case "d": return value * 24 * 60 * 60;
+            default: return value * 24 * 60 * 60;
+        }
+    }
+
 }
+
+export const configService = new ConfigService();

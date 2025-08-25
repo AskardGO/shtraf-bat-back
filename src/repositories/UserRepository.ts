@@ -9,21 +9,19 @@ export class UserRepository {
         return UserModel.findOne({ login });
     }
 
-    async findById(uid: string) {
+    async findByUid(uid: string) {
         return UserModel.findOne({ uid });
     }
 
-    async update(user: IUser) {
-        return UserModel.findOneAndUpdate({ uid: user.uid }, user, { new: true });
+    async updateStatus(uid: string, isOnline: boolean) {
+        return UserModel.updateOne({ uid }, { isOnline, lastSeen: new Date() });
     }
 
-
-    async updateStatus(uid: string, online: boolean) {
-        return UserModel.findOneAndUpdate(
-            { uid },
-            { isOnline: online, lastSeen: online ? null : new Date() },
-            { new: true }
-        );
+    async setRefreshToken(uid: string, token: string | null) {
+        return UserModel.updateOne({ uid }, { refreshToken: token });
     }
 
+    async findAll() {
+        return UserModel.find();
+    }
 }

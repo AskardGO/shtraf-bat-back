@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "types": "index.d.ts",
   "scripts": {
-    "dev": "ts-node src/server.ts"
+    "dev": "ts-node src/server.ts",
+    "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",

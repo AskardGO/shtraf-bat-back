@@ -5,6 +5,6 @@ export interface IJwtPayload {
     login: string;
 }
 
-export const signJwt = (app: FastifyInstance, payload: IJwtPayload) => {
-    return app.jwt.sign(payload);
+export const signJwt = (app: FastifyInstance, payload: IJwtPayload, expiresIn: string = "15m") => {
+    return app.jwt.sign(payload, { expiresIn });
 };
