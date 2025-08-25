@@ -4,7 +4,9 @@ import jwt from "@fastify/jwt";
 import cookie from "@fastify/cookie";
 import mongoose from "mongoose";
 import { ConfigService } from "./config/ConfigService";
-import {authRoutes} from "./routes/auth.routes";
+import { authRoutes } from "./routes/auth.routes";
+import { userRoutes } from "./routes/user.routes";
+import { authenticate } from "./plugins/authenticate";
 
 const configService = new ConfigService();
 
@@ -23,7 +25,9 @@ export const buildApp = async () => {
         process.exit(1);
     }
 
+    app.register(authenticate);
     await app.register(authRoutes, { prefix: "/auth" });
+    await app.register(userRoutes, { prefix: "/users" });
 
     return app;
 };

@@ -35,4 +35,16 @@ export class AuthService {
             token: signJwt(this.app, { uid: user.uid, login: user.login })
         };
     }
+
+    async logout(uid: string) {
+        await this.userRepo.updateStatus(uid, false);
+        return { message: "Logged out" };
+    }
+
+    async getStatus(uid: string) {
+        const user = await this.userRepo.findById(uid);
+        if (!user) throw new Error("User not found");
+        return { uid: user.uid, isOnline: user.isOnline, lastSeen: user.lastSeen };
+    }
+
 }

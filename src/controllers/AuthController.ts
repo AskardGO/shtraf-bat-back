@@ -23,4 +23,15 @@ export class AuthController {
             reply.status(400).send({ error: err.message });
         }
     };
+
+    logout = async (req: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const user = req.user as any;
+            await this.authService.logout(user.uid);
+            reply.send({ message: "Logged out successfully" });
+        } catch (err: any) {
+            reply.status(400).send({ error: err.message });
+        }
+    };
+
 }
