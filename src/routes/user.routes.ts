@@ -1,13 +1,8 @@
 import { FastifyInstance } from "fastify";
-import { UserController } from "../controllers/UserController";
-import { UserRepository } from "../repositories/UserRepository";
+import {userController} from "../controllers";
 
 export const userRoutes = async (app: FastifyInstance) => {
-    const userRepo = new UserRepository();
-    const userController = new UserController(userRepo);
-
-    app.get("/users/:uid/status", userController.getStatus);
-    app.get("/users/:uid", userController.getProfile);
-    app.get("/users/me", { preValidation: [app.authenticate]}, userController.getMe);
-
+    app.get("/:uid/status", userController.getStatus);
+    app.get("/:uid", userController.getProfile);
+    app.get("/me", { preValidation: [app.authenticate.bind(app)] }, userController.getMe);
 };

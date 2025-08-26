@@ -7,7 +7,7 @@ export class UserController {
     getStatus = async (req: FastifyRequest, reply: FastifyReply) => {
         try {
             const { uid } = req.params as any;
-            const user = await this.userRepo.findById(uid);
+            const user = await this.userRepo.findByUid(uid);
             if (!user) return reply.status(404).send({ error: "User not found" });
 
             reply.send({
@@ -23,7 +23,7 @@ export class UserController {
     getProfile = async (req: FastifyRequest, reply: FastifyReply) => {
         try {
             const { uid } = req.params as any;
-            const user = await this.userRepo.findById(uid);
+            const user = await this.userRepo.findByUid(uid);
             if (!user) return reply.status(404).send({ error: "User not found" });
 
             reply.send({
@@ -43,7 +43,7 @@ export class UserController {
             const userJwt = req.user as any;
             if (!userJwt) return reply.status(401).send({ error: "Unauthorized" });
 
-            const user = await this.userRepo.findById(userJwt.uid);
+            const user = await this.userRepo.findByUid(userJwt.uid);
             if (!user) return reply.status(404).send({ error: "User not found" });
 
             reply.send({
@@ -57,5 +57,4 @@ export class UserController {
             reply.status(400).send({ error: err.message });
         }
     };
-
 }

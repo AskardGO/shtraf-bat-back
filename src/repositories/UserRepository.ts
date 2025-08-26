@@ -24,4 +24,8 @@ export class UserRepository {
     async findAll() {
         return UserModel.find();
     }
+
+    async update(uid: string, data: Partial<IUser>) {
+        return UserModel.updateOne({ uid }, data);
+    }
 }

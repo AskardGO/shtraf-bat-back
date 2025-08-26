@@ -1,5 +1,6 @@
 import "fastify";
 import "@fastify/jwt";
+import { Server as SocketIOServer } from 'socket.io';
 
 declare module "@fastify/jwt" {
     interface FastifyJWT {
@@ -8,8 +9,9 @@ declare module "@fastify/jwt" {
     }
 }
 
-declare module "fastify" {
+declare module 'fastify' {
     interface FastifyInstance {
-        authenticate: (req: any, reply: any) => Promise<void>;
+        authenticate: (request: any, reply: any) => Promise<void>;
+        io: SocketIOServer;
     }
 }

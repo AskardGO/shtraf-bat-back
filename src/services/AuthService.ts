@@ -7,7 +7,13 @@ import bcrypt from "bcrypt";
 import { configService } from "../config/ConfigService";
 
 export class AuthService {
-    constructor(private userRepo: UserRepository, private app: FastifyInstance) {}
+
+    private app!: FastifyInstance;
+    constructor(private userRepo: UserRepository) {}
+
+    setApp(app: FastifyInstance) {
+        this.app = app;
+    }
 
     private async hashToken(token: string) {
         const salt = await bcrypt.genSalt(10);

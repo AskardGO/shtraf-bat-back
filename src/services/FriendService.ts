@@ -1,22 +1,42 @@
-import {UserRepository} from "../repositories/UserRepository";
-import {ChatService} from "./ChatService";
+import { FriendRepository } from "../repositories/FriendRepository";
+import { ChatService } from "./ChatService";
 
 export class FriendService {
     constructor(
-        private userRepo: UserRepository,
+        private friendRepo: FriendRepository,
         private chatService: ChatService
     ) {}
-    async addFriend(userId: string, friendId: string) {
-        const user = await this.userRepo.findById(userId);
-        const friend = await this.userRepo.findById(friendId);
-        if (!user || !friend) throw new Error("User not found");
 
-        user.friends = user.friends || [];
-        if (!user.friends.includes(friend.uid)) {
-            user.friends.push(friend.uid);
-            await this.userRepo.update(user);
+    async addFriend(userId: string, friendId: string) {
+
+        await this.friendRepo.addFriend(userId, friendId);
+        await this.friendRepo.addFriend(friendId, userId);
+
+        let chat = await this.chatService.getChatBetween(userId, friendId);
+
+        if (chat) {
+            await this.chatService.restoreChatBetween(userId, friendId);
+        } else {
+            chat = await this.chatService.createChat(userId, friendId);
         }
 
-        return await this.chatService.createChat(user, friend);
+        return chat;
+    }
+
+    async removeFriend(userId: string, friendId: string) {
+
+        await this.friendRepo.removeFriend(userId, friendId);
+        await this.friendRepo.removeFriend(friendId, userId);
+
+        const chat = await this.chatService.getChatBetween(userId, friendId);
+        if (chat) {
+            await this.chatService.archiveChat(chat.id);
+        }
+
+        return { message: "Friend removed and chat archived" };
+    }
+
+    async listFriends(userId: string) {
+        return this.friendRepo.getFriends(userId);
     }
 }

@@ -17,7 +17,7 @@ export class AuthController {
                 maxAge: configService.getRefreshTokenExpiresInSeconds()
             });
 
-            reply.send({ ...user, accessToken });
+            reply.send({ ...user, accessToken, refreshToken });
         } catch (err: any) {
             reply.status(400).send({ error: err.message });
         }
@@ -35,7 +35,7 @@ export class AuthController {
                 maxAge: configService.getRefreshTokenExpiresInSeconds()
             });
 
-            reply.send({ ...user, accessToken });
+            reply.send({ ...user, accessToken, refreshToken });
         } catch (err: any) {
             reply.status(400).send({ error: err.message });
         }
