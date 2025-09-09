@@ -5,6 +5,7 @@ import cookie from "@fastify/cookie";
 import mongoose from "mongoose";
 
 import {configService} from "./config/ConfigService";
+import {swaggerPlugin} from "./plugins/swagger";
 
 import {authRoutes} from "./routes/auth.routes";
 import {userRoutes} from "./routes/user.routes";
@@ -20,7 +21,13 @@ export const buildApp = async () => {
 
     authService.setApp(app);
 
-    await app.register(cors, {origin: true});
+    await swaggerPlugin(app);
+
+    await app.register(cors, {
+        origin: true,
+        credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+    });
     await app.register(cookie);
     await app.register(jwt, {secret: configService.getJwtSecret()});
 
@@ -28,9 +35,7 @@ export const buildApp = async () => {
 
     try {
         await mongoose.connect(configService.getMongoUri());
-        console.log("✅ Connected to MongoDB Atlas");
     } catch (err) {
-        console.error("❌ MongoDB connection error:", err);
         process.exit(1);
     }
 

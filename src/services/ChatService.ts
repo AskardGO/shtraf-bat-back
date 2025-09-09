@@ -33,7 +33,13 @@ export class ChatService {
     }
 
     async getUserChats(userId: string) {
-        return this.chatRepo.findByParticipant(userId);
+        try {
+            const chats = await this.chatRepo.findByParticipant(userId);
+            return chats.map(chat => chat.toObject());
+        } catch (error) {
+            console.error('Error in getUserChats:', error);
+            throw error;
+        }
     }
 
     async sendMessage(chatId: string, senderId: string, text: string) {
@@ -51,9 +57,23 @@ export class ChatService {
         });
 
         chat.messages.push(message.id);
-        await this.chatRepo.update(chatId, { messages: chat.messages });
+        await this.chatRepo.update(chatId, { 
+            messages: chat.messages
+        });
 
         return message;
+    }
+
+    async getChatMessages(chatId: string, userId: string, limit: number = 50, offset: number = 0) {
+        const chat = await this.chatRepo.findById(chatId);
+        if (!chat) throw new Error("Chat not found");
+
+        if (!chat.participants.includes(userId)) {
+            throw new Error("User is not part of this chat");
+        }
+
+        const messages = await this.messageRepo.findByChatIdPaginated(chatId, limit, offset);
+        return messages;
     }
 
 }

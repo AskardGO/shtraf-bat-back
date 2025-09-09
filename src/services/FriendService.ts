@@ -8,9 +8,20 @@ export class FriendService {
     ) {}
 
     async addFriend(userId: string, friendId: string) {
+        console.log('FriendService.addFriend called with:', { userId, friendId });
 
-        await this.friendRepo.addFriend(userId, friendId);
-        await this.friendRepo.addFriend(friendId, userId);
+        try {
+            console.log('Adding friend for user:', userId, '-> friend:', friendId);
+            await this.friendRepo.addFriend(userId, friendId);
+            
+            console.log('Adding friend for user:', friendId, '-> friend:', userId);
+            await this.friendRepo.addFriend(friendId, userId);
+            
+            console.log('Both friends added successfully');
+        } catch (error) {
+            console.error('Error in addFriend:', error);
+            throw error;
+        }
 
         let chat = await this.chatService.getChatBetween(userId, friendId);
 

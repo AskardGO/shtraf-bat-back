@@ -1,10 +1,12 @@
-import { UserModel, IUser } from "../models/User";
+import { UserModel } from "../models/User";
 
 export class FriendRepository {
     async addFriend(userId: string, friendId: string) {
         const user = await UserModel.findOne({ uid: userId });
-        if (!user) throw new Error("User not found");
-
+        if (!user) {
+            throw new Error("User not found");
+        }
+        
         user.friends = user.friends || [];
         if (!user.friends.includes(friendId)) {
             user.friends.push(friendId);
@@ -26,6 +28,12 @@ export class FriendRepository {
 
     async getFriends(userId: string) {
         const user = await UserModel.findOne({ uid: userId });
-        return user?.friends || [];
+        if (!user || !user.friends || user.friends.length === 0) {
+            return [];
+        }
+
+        return await UserModel.find({ 
+            uid: { $in: user.friends } 
+        }).select('uid login avatar isOnline lastSeen displayedName');
     }
 }

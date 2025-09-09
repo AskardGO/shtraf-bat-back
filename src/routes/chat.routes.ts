@@ -37,6 +37,12 @@ export const chatRoutes = async (app: FastifyInstance) => {
         "/my",
         {preValidation: [app.authenticate.bind(app)]},
         chatController.getMyChats
-    )
+    );
+
+    app.get(
+        "/:chatId/messages",
+        {preValidation: [app.authenticate.bind(app)]},
+        chatController.getChatMessages
+    );
 
 };

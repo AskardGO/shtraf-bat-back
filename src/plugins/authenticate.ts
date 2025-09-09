@@ -5,7 +5,6 @@ export const authenticate: FastifyPluginAsync = async (app) => {
     app.decorate(
         'authenticate',
         async function (request, reply) {
-            console.log('Authenticating request...');
             try {
                 await request.jwtVerify();
             } catch (err) {

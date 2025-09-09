@@ -86,4 +86,18 @@ export class ChatController {
         }
     };
 
+    getChatMessages = async (req: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const userJwt = req.user as any;
+            if (!userJwt) return reply.status(401).send({ error: "Unauthorized" });
+
+            const { chatId } = req.params as { chatId: string };
+            const { limit = 50, offset = 0 } = req.query as { limit?: number; offset?: number };
+            const messages = await chatService.getChatMessages(chatId, userJwt.uid, Number(limit), Number(offset));
+            reply.send(messages);
+        } catch (err: any) {
+            reply.status(400).send({ error: err.message });
+        }
+    };
+
 }

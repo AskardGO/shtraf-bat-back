@@ -6,6 +6,8 @@ import { MessageRepository } from "../repositories/MessageRepository";
 interface WSClient {
     uid: string;
     socketId: string;
+    isActive: boolean;
+    lastActivity: Date;
 }
 
 export class WebSocketService {
@@ -20,20 +22,22 @@ export class WebSocketService {
     async register(io: Server) {
         io.on("connection", async (socket: Socket) => {
             const { uid } = socket.handshake.auth;
-            console.log("🔌 Socket connected", socket.id, uid);
 
             if (!uid) {
-                console.log("❌ No UID, disconnecting", socket.id);
                 socket.disconnect(true);
                 return;
             }
 
-            this.clients.push({ uid, socketId: socket.id });
+            this.clients = this.clients.filter(c => c.uid !== uid);
+            this.clients.push({
+                uid,
+                socketId: socket.id,
+                isActive: true,
+                lastActivity: new Date()
+            });
             await this.userRepo.updateStatus(uid, true);
-            console.log(`✅ User ${uid} is online`);
 
             socket.on("message", async (data: any) => {
-                console.log(`📨 Message from ${uid}:`, data);
                 try {
                     await this.handleMessage(socket, uid, data);
                 } catch (err) {
@@ -42,14 +46,18 @@ export class WebSocketService {
             });
 
             socket.on("typing", async (data: { chatId: string; isTyping: boolean }) => {
-                console.log(`⌨️ Typing from ${uid} in chat ${data.chatId}: ${data.isTyping}`);
                 await this.broadcastTyping(uid, data.chatId, data.isTyping, io);
+            });
+
+            socket.on("presence", async (data: { isActive: boolean; timestamp: Date }) => {
+                await this.handlePresenceUpdate(socket, uid, data.isActive, data.timestamp, io);
             });
 
             socket.on("disconnect", async () => {
                 this.clients = this.clients.filter(c => c.socketId !== socket.id);
                 await this.userRepo.updateStatus(uid, false);
-                console.log(`❌ User ${uid} disconnected`);
+
+                await this.broadcastPresenceUpdate(uid, false, new Date(), io);
             });
         });
 
@@ -74,8 +82,37 @@ export class WebSocketService {
 
         chat.participants.forEach(participantId => {
             const client = this.clients.find(c => c.uid === participantId);
+
             if (client) {
-                socket.to(client.socketId).emit("message", { chatId, message });
+                if (client.uid === uid) {
+                    socket.emit("message", { chatId, message });
+                } else {
+                    socket.broadcast.to(client.socketId).emit("message", { chatId, message });
+                }
+            }
+        });
+    }
+
+    private async handlePresenceUpdate(socket: Socket, uid: string, isActive: boolean, timestamp: Date, io: Server) {
+        const client = this.clients.find(c => c.uid === uid);
+        if (client) {
+            client.isActive = isActive;
+            client.lastActivity = timestamp;
+        }
+
+        await this.userRepo.updateStatus(uid, isActive);
+
+        await this.broadcastPresenceUpdate(uid, isActive, timestamp, io);
+    }
+
+    private async broadcastPresenceUpdate(userId: string, isOnline: boolean, lastSeen: Date, io: Server) {
+        this.clients.forEach(client => {
+            if (client.uid !== userId) {
+                io.to(client.socketId).emit("presence", {
+                    userId,
+                    isOnline,
+                    lastSeen
+                });
             }
         });
     }
